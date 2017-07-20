@@ -1,4 +1,5 @@
-(ns directionsurveycarry.actions)
+(ns directionsurveycarry.actions
+  (:require [directionsurveycarry.db :as mydb]))
 
 
 (defn onincrementaction1 [model]
@@ -21,4 +22,14 @@
     (update :val1 dec)
     (update :val2 dec)))
 
+(defn donothing [model]
+  model)
+
+(defn clickchange [model]
+  (swap! mydb/appstate assoc :test "aaa!!!!")
+  model)
+
+(defn update-something [model data]
+  (.log js/console (str "appstate: " data))
+  model)
 

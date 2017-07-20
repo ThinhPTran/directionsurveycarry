@@ -1,6 +1,7 @@
 ; namespace is extracted into a separate src folder in order to be reused in composite app examples
 (ns directionsurveycarry.views
   (:require [directionsurveycarry.actions :as actions]
+            [directionsurveycarry.db :as mydb]
             [cljs.core.match :refer-macros [match]]
             [reagent.ratom :refer [reaction]]))
 
@@ -26,6 +27,15 @@
          :on-decrement2
          (dispatch-action :decrement2)
 
+         :on-donothing
+         (dispatch-action :donothing)
+
+         :on-clickchange
+         (dispatch-action :clickchange)
+
+         [:on-update-something data]
+         (dispatch-action [:update-something data])
+
          :on-increment-if-odd
          (when (odd? (:val @model))
            (dispatch-action :increment))
@@ -39,7 +49,10 @@
          :increment1 (actions/onincrementaction1 model)
          :decrement1 (actions/ondecrementaction1 model)
          :increment2 (actions/onincrementaction2 model)
-         :decrement2 (actions/ondecrementaction2 model)))
+         :decrement2 (actions/ondecrementaction2 model)
+         :donothing (actions/donothing model)
+         [:update-something data] (actions/update-something model data)
+         :clickchange (actions/clickchange model)))
 
 (defn view-model
   [model]
@@ -55,9 +68,15 @@
    [:button {:on-click #(dispatch :on-decrement1)} "-1"] " "
    [:button {:on-click #(dispatch :on-increment2)} "+2"] " "
    [:button {:on-click #(dispatch :on-decrement2)} "-2"] " "
+   [:button {:on-click #(dispatch :on-donothing)} "Do nothing"] " "
+   [:button {:on-click #(dispatch :on-clickchange)} "click change"] " "
    [:button {:on-click #(dispatch :on-increment-if-odd)} "Increment if odd"] " "
    [:button {:on-click #(dispatch :on-increment-async)} "Increment async"]])
 
 (def blueprint {:initial-model -initial-model
                 :on-signal     -on-signal
                 :on-action     -on-action})
+
+
+
+

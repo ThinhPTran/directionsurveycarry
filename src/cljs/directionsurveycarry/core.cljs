@@ -1,5 +1,6 @@
 (ns directionsurveycarry.core
   (:require [directionsurveycarry.views :as views]
+            [directionsurveycarry.db :as mydb]
             [reagent.core :as r]
             [carry.core :as carry]
             [carry-reagent.core :as carry-reagent]))
@@ -24,3 +25,13 @@
 (defn on-jsload
   []
   #_(. js/console clear))
+
+;;;;;;;;;;;;;;;;;;;;;;;; Check db change
+(defn appstatechangehandler []
+  (.log js/console "appstate changes!!!")
+  ((:dispatch-signal app) [:on-update-something @mydb/appstate]))
+
+(add-watch mydb/appstate  :appstatewatch appstatechangehandler)
+
+
+
