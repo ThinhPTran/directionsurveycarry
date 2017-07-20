@@ -1,12 +1,13 @@
 ; namespace is extracted into a separate src folder in order to be reused in composite app examples
 (ns directionsurveycarry.views
-  (:require [directionsurveycarry.actions :as actions]
+  (:require [goog.dom :as gdom]
+            [directionsurveycarry.actions :as actions]
             [directionsurveycarry.db :as mydb]
             [cljs.core.match :refer-macros [match]]
             [reagent.ratom :refer [reaction]]))
 
-(def -initial-model {:val1 0
-                     :val2 0})
+(def -initial-model {:inputtext ""
+                     :localname ""})
 
 (defn -on-signal
   [model signal _dispatch-signal dispatch-action]
@@ -15,63 +16,61 @@
          :on-start nil
          :on-stop nil
 
-         :on-increment1
-         (dispatch-action :increment1)
+         [:on-change-input-text inputtext]
+         (dispatch-action [:update-inputtext inputtext])
 
-         :on-decrement1
-         (dispatch-action :decrement1)
+         :on-change-username
+         (let [inputtext (:inputtext @model)]
+;;            (.log js/console (str "on-change-username: " inputtext))
+           (dispatch-action [:update-user inputtext]))
 
-         :on-increment2
-         (dispatch-action :increment2)
 
-         :on-decrement2
-         (dispatch-action :decrement2)
 
-         :on-donothing
-         (dispatch-action :donothing)
 
-         :on-clickchange
-         (dispatch-action :clickchange)
-
-         [:on-update-something data]
-         (dispatch-action [:update-something data])
-
-         :on-increment-if-odd
-         (when (odd? (:val @model))
-           (dispatch-action :increment))
-
-         :on-increment-async
-         (.setTimeout js/window #(dispatch-action :increment) 1000)))
+         )
+  )
 
 (defn -on-action
   [model action]
   (match action
-         :increment1 (actions/onincrementaction1 model)
-         :decrement1 (actions/ondecrementaction1 model)
-         :increment2 (actions/onincrementaction2 model)
-         :decrement2 (actions/ondecrementaction2 model)
-         :donothing (actions/donothing model)
-         [:update-something data] (actions/update-something model data)
-         :clickchange (actions/clickchange model)))
+         [:update-inputtext inputtext]
+         (assoc model :inputtext inputtext)
+
+         [:update-user username]
+         (assoc model :localname username)
+
+  ))
 
 (defn view-model
   [model]
-  {:counter1 (reaction (str "#" (:val1 @model)))
-   :counter2 (reaction (str "#" (:val2 @model)))})
+  {:inputtext (reaction (:inputtext @model))
+   :localname (reaction (:localname @model))})
+
+(defn loginform [inputtext localname dispatch]
+    [:div.col-sm-2
+     [:input
+      {:id "my-input-box"
+       :type "text"
+       :value inputtext
+       :onChange (fn [_]
+                   (let [v (.-value (gdom/getElement "my-input-box"))]
+                     (.log js/console "change something!!!: " v)
+                     (swap! mydb/local-login assoc :input-text v)))}]
+     [:button#btn-login
+      {:type "button"
+       :onClick (fn []
+                  (.log js/console "logging in!!!")
+                  (dispatch :on-change-username))}
+      "Secure login!"]
+     [:div (str "input text: " inputtext)]
+     [:div (str "user name: " localname)]])
 
 (defn view
-  [{:keys [counter1 counter2] :as _view-model} dispatch]
+  [{:keys [inputtext localname] :as _view-model} dispatch]
   [:div
-   [:div (str "counter1: " @counter1)] " "
-   [:div (str "counter2: " @counter2)] " "
-   [:button {:on-click #(dispatch :on-increment1)} "+1"] " "
-   [:button {:on-click #(dispatch :on-decrement1)} "-1"] " "
-   [:button {:on-click #(dispatch :on-increment2)} "+2"] " "
-   [:button {:on-click #(dispatch :on-decrement2)} "-2"] " "
-   [:button {:on-click #(dispatch :on-donothing)} "Do nothing"] " "
-   [:button {:on-click #(dispatch :on-clickchange)} "click change"] " "
-   [:button {:on-click #(dispatch :on-increment-if-odd)} "Increment if odd"] " "
-   [:button {:on-click #(dispatch :on-increment-async)} "Increment async"]])
+   [:h2 "Welcome to my Carry experiment"]
+   [:div.row
+    [loginform @inputtext @localname dispatch]]])
 
 (def blueprint {:initial-model -initial-model
                 :on-signal     -on-signal

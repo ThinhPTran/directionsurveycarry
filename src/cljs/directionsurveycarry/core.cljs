@@ -1,6 +1,7 @@
 (ns directionsurveycarry.core
   (:require [directionsurveycarry.views :as views]
             [directionsurveycarry.db :as mydb]
+            [directionsurveycarry.actions ]
             [reagent.core :as r]
             [carry.core :as carry]
             [carry-reagent.core :as carry-reagent]))
@@ -12,6 +13,7 @@
   (let [app (carry/app views/blueprint)
         [app-view-model app-view] (carry-reagent/connect app views/view-model views/view)]
     (r/render app-view (.getElementById js/document "root"))
+    (mydb/setupclientdata)
     ((:dispatch-signal app) :on-start)
     (assoc app :view-model app-view-model)))
 
@@ -27,11 +29,11 @@
   #_(. js/console clear))
 
 ;;;;;;;;;;;;;;;;;;;;;;;; Check db change
-(defn appstatechangehandler []
-  (.log js/console "appstate changes!!!")
-  ((:dispatch-signal app) [:on-update-something @mydb/appstate]))
+;; (defn appstatechangehandler []
+;;   (.log js/console "appstate changes!!!")
+;;   ((:dispatch-signal app) [:on-update-something @mydb/appstate]))
 
-(add-watch mydb/appstate  :appstatewatch appstatechangehandler)
+;; (add-watch mydb/appstate  :appstatewatch appstatechangehandler)
 
 
 
