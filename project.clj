@@ -30,7 +30,7 @@
   {:builds
    [{:id           "dev"
      :source-paths ["src/cljs"]
-     :figwheel     {:on-jsload "directionsurveycarry.core/reload"}
+     :figwheel     {:on-jsload "directionsurveycarry.core/on-jsload"}
      :compiler     {:main                 directionsurveycarry.core
                     :optimizations        :none
                     :output-to            "resources/public/js/app.js"

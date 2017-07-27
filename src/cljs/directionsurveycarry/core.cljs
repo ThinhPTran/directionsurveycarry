@@ -13,7 +13,6 @@
   (let [app (carry/app views/blueprint)
         [app-view-model app-view] (carry-reagent/connect app views/view-model views/view)]
     (r/render app-view (.getElementById js/document "root"))
-    (mydb/setupclientdata)
     ((:dispatch-signal app) :on-start)
     (assoc app :view-model app-view-model)))
 

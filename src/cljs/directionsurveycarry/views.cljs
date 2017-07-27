@@ -21,7 +21,6 @@
 
          :on-change-username
          (let [inputtext (:inputtext @model)]
-;;            (.log js/console (str "on-change-username: " inputtext))
            (dispatch-action [:update-user inputtext]))
 
 
@@ -55,7 +54,7 @@
        :onChange (fn [_]
                    (let [v (.-value (gdom/getElement "my-input-box"))]
                      (.log js/console "change something!!!: " v)
-                     (swap! mydb/local-login assoc :input-text v)))}]
+                     (dispatch [:on-change-input-text v])))}]
      [:button#btn-login
       {:type "button"
        :onClick (fn []
