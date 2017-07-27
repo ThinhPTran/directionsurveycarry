@@ -1,5 +1,16 @@
 (ns directionsurveycarry.utils)
 
+;; This part is for local state
+(defn gentabledata [len]
+  (reduce #(conj %1 [%2 %2 0])
+          []
+          (map #(* % 5) (range 100 (+ 100 len)))))
+
+(def init-tableconfig {:colHeaders ["MD" "TVD" "Deviation"]
+                       :data        (gentabledata 15)
+                       :rowHeaders  false
+                       :contextMenu true})
+
 (defn create-msg [action value]
   {:act action
    :val value

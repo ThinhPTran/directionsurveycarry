@@ -3,11 +3,15 @@
   (:require [goog.dom :as gdom]
             [directionsurveycarry.actions :as actions]
             [directionsurveycarry.db :as mydb]
+            [directionsurveycarry.utils :as utils]
             [cljs.core.match :refer-macros [match]]
+            [cljsjs.handsontable]
+            [cljsjs.highcharts]
             [reagent.ratom :refer [reaction]]))
 
 (def -initial-model {:inputtext ""
-                     :localname ""})
+                     :localname ""
+                     :localtableconfig utils/init-tableconfig})
 
 (defn -on-signal
   [model signal _dispatch-signal dispatch-action]
@@ -22,7 +26,6 @@
          :on-change-username
          (let [inputtext (:inputtext @model)]
            (dispatch-action [:update-user inputtext]))
-
 
 
 
@@ -43,7 +46,8 @@
 (defn view-model
   [model]
   {:inputtext (reaction (:inputtext @model))
-   :localname (reaction (:localname @model))})
+   :localname (reaction (:localname @model))
+   :localtableconfig (reaction (:localtableconfig @model))})
 
 (defn loginform [inputtext localname dispatch]
     [:div.col-sm-2
@@ -64,12 +68,50 @@
      [:div (str "input text: " inputtext)]
      [:div (str "user name: " localname)]])
 
+(defn mylocaltable
+  [inputtableconfig]
+  (let [tableconfig inputtableconfig
+        table (atom {:table nil})]
+    [:div.col-sm-4
+     [:div
+      {:style {:min-width "310px" :max-width "800px" :margin "0 auto"}
+       :ref (fn [mydiv]
+              (if (some? mydiv)
+                (swap! table assoc :table
+                       (js/Handsontable mydiv (clj->js (assoc-in tableconfig [:afterChange] #(do
+                                                                                               (.log js/console "set value on table"))))))
+                (let [mytable (:table @table)]
+                  (if (some? mytable)
+                    (do
+                      (.destroy mytable)
+                      (swap! table assoc :table nil))))))}]]))
+
+(defn mylocalchart
+  [inputtableconfig]
+  (let [tableconfig inputtableconfig
+        my-chart-config (utils/gen-chart-config-handson tableconfig)
+        chart (atom {:chart nil})]
+    [:div.col-sm-4
+     [:div
+      {:style {:height "100%" :width "100%" :position "relative"}
+       :ref (fn [mydiv]
+              (if (some? mydiv)
+                (swap! chart assoc :chart (js/Highcharts.Chart. mydiv (clj->js @my-chart-config)))
+                (let [mychart (:chart @chart)]
+                  (if (some? mychart)
+                    (do
+                      (.destroy mychart)
+                      (swap! chart :chart nil))))))}]]))
+
 (defn view
-  [{:keys [inputtext localname] :as _view-model} dispatch]
+  [{:keys [inputtext localname localtableconfig] :as _view-model} dispatch]
   [:div
    [:h2 "Welcome to my Carry experiment"]
    [:div.row
-    [loginform @inputtext @localname dispatch]]])
+    [loginform @inputtext @localname dispatch]]
+   [:div.row
+    [mylocaltable @localtableconfig]
+    [mylocalchart @localtableconfig]]])
 
 (def blueprint {:initial-model -initial-model
                 :on-signal     -on-signal

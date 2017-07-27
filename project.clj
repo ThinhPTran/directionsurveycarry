@@ -6,7 +6,10 @@
                  [cljsjs/react-with-addons "15.3.1-0"]
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [carry "0.7.0"]
-                 [carry-reagent "0.7.0"]]
+                 [carry-reagent "0.7.0"]
+                 [cljs-react-material-ui "0.2.30"]
+                 [cljsjs/handsontable "0.26.1-0"]
+                 [cljsjs/highcharts "5.0.12-1"]]
 
   :min-lein-version "2.5.3"
 
