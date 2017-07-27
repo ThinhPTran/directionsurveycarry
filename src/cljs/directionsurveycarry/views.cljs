@@ -27,7 +27,21 @@
          (let [inputtext (:inputtext @model)]
            (dispatch-action [:update-user inputtext]))
 
-
+         [:on-set-value inputval]
+         (let [changeDatas (mapv #(assoc-in % [3] (js/parseFloat (get-in % [3]))) inputval)
+               tmpchangeData (first changeDatas)
+               row (get tmpchangeData 0)
+               col (get tmpchangeData 1)
+               val (get tmpchangeData 3)
+               changeData (-> {}
+                              (assoc :row row)
+                              (assoc :col col)
+                              (assoc :val val))]
+           (if (and (some? row)
+                    (some? col)
+                    (some? val))
+             (dispatch-action [:set-value changeData])
+             ))
 
          )
   )
@@ -40,6 +54,9 @@
 
          [:update-user username]
          (assoc model :localname username)
+
+         [:set-value changeDatas]
+         (actions/set-action model changeDatas)
 
   ))
 
@@ -69,7 +86,7 @@
      [:div (str "user name: " localname)]])
 
 (defn mylocaltable
-  [inputtableconfig]
+  [inputtableconfig dispatch]
   (let [tableconfig inputtableconfig
         table (atom {:table nil})]
     [:div.col-sm-4
@@ -79,7 +96,7 @@
               (if (some? mydiv)
                 (swap! table assoc :table
                        (js/Handsontable mydiv (clj->js (assoc-in tableconfig [:afterChange] #(do
-                                                                                               (.log js/console "set value on table"))))))
+                                                                                               (dispatch [:on-set-value (js->clj %)]))))))
                 (let [mytable (:table @table)]
                   (if (some? mytable)
                     (do
@@ -110,7 +127,7 @@
    [:div.row
     [loginform @inputtext @localname dispatch]]
    [:div.row
-    [mylocaltable @localtableconfig]
+    [mylocaltable @localtableconfig dispatch]
     [mylocalchart @localtableconfig]]])
 
 (def blueprint {:initial-model -initial-model
